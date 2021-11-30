@@ -12,8 +12,6 @@
         <SearchGridForm @onSearchFormSubmit="onSearchFormSubmit" />
         <SearchTypeTabs class="mb-4" />
         <FilterDisplay v-show="shouldShowFilterTags" />
-        <NuxtChild :key="$route.path" @onLoadMoreItems="onLoadMoreItems" />
-        <ScrollButton :show-btn="showScrollButton" />
         <SearchGrid
           :id="`tab-${searchType}`"
           role="tabpanel"
@@ -32,10 +30,7 @@
             />
           </template>
         </SearchGrid>
-        <ScrollButton
-          data-testid="scroll-button"
-          :show-btn="showScrollButton"
-        />
+        <ScrollButton data-testid="scroll-button" :v-show="showScrollButton" />
       </div>
     </div>
   </div>
