@@ -42,10 +42,12 @@ describe('Search Store', () => {
       expect(state.fetchState.audio).toEqual({
         fetchingError: null,
         isFetching: false,
+        isFinished: false,
       })
       expect(state.fetchState.image).toEqual({
         fetchingError: null,
         isFetching: false,
+        isFinished: false,
       })
       expect(state.audio).toEqual({})
       expect(state.image).toEqual({})

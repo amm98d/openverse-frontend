@@ -23,7 +23,6 @@
               :key="$route.path"
               :media-results="results"
               :fetch-state="fetchState"
-              :is-finished="isFinished"
               :is-filter-visible="isFilterVisible"
               :search-term="query.q"
               @load-more="getMediaItems"
@@ -110,7 +109,7 @@ const BrowsePage = {
   computed: {
     ...mapState(SEARCH, ['query', 'isFilterVisible', 'searchType']),
     ...mapGetters(SEARCH, ['searchQueryParams', 'isAnyFilterApplied']),
-    ...mapGetters(MEDIA, ['results', 'fetchState', 'isFinished']),
+    ...mapGetters(MEDIA, ['results', 'fetchState']),
     mediaType() {
       // Default to IMAGE until media search/index is generalized
       return this.searchType !== ALL_MEDIA ? this.searchType : IMAGE

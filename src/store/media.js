@@ -49,10 +49,12 @@ export const state = () => ({
     audio: {
       isFetching: false,
       fetchingError: null,
+      isFinished: false,
     },
     image: {
       isFetching: false,
       fetchingError: null,
+      isFinished: false,
     },
   },
   audio: {},
@@ -69,8 +71,11 @@ export const createActions = (services) => ({
    * should be added to or replaced.
    * @return {Promise<void>}
    */
-  async [FETCH_MEDIA]({ commit, dispatch, rootState, rootGetters }, payload) {
-    const { page, shouldPersistMedia = false } = payload
+  async [FETCH_MEDIA](
+    { commit, dispatch, rootState, rootGetters },
+    payload = {}
+  ) {
+    const { page = undefined, shouldPersistMedia = false } = payload
 
     const queryParams = prepareSearchQueryParams({
       ...rootGetters['search/searchQueryParams'],
@@ -240,22 +245,6 @@ export const getters = {
     }
     return state.fetchState[getters.mediaType]
   },
-  /**
-   * Returns true if all pages from the search result have been shown.
-   * @param {import('./types').MediaState} state
-   * @param getters
-   * @param rootState
-   * @returns {boolean}
-   */
-  isFinished(state, getters, rootState) {
-    if (getters.unsupportedMediaType) {
-      return true
-    }
-    return (
-      state.results[rootState.search.query.mediaType].page >=
-      state.results[rootState.search.query.mediaType].pageCount
-    )
-  },
   mediaType(state, getters, rootState) {
     return rootState.search.query.mediaType
   },
@@ -279,6 +268,7 @@ export const mutations = {
   [FETCH_START_MEDIA](_state, { mediaType }) {
     _state.fetchState[mediaType].isFetching = true
     _state.fetchState[mediaType].fetchingError = null
+    _state.fetchState[mediaType].isFinished = false
   },
   [FETCH_END_MEDIA](_state, { mediaType }) {
     _state.fetchState[mediaType].isFetching = false
@@ -287,6 +277,7 @@ export const mutations = {
     const { mediaType, errorMessage } = params
     _state.fetchState[mediaType].isFetching = false
     _state.fetchState[mediaType].fetchingError = errorMessage
+    _state.fetchState[mediaType].isFinished = true
   },
   [SET_AUDIO](_state, params) {
     _state.audio = decodeMediaData(params.audio, AUDIO)
@@ -308,10 +299,12 @@ export const mutations = {
     if (shouldPersistMedia) {
       mediaToSet = _state.results[mediaType].items.concat(media)
     }
+    const mediaPage = page || 1
     _state.results[mediaType].items = mediaToSet
     _state.results[mediaType].count = mediaCount || 0
-    _state.results[mediaType].page = page || 1
+    _state.results[mediaType].page = mediaPage
     _state.results[mediaType].pageCount = pageCount
+    _state.fetchState[mediaType].isFinished = mediaPage >= pageCount
   },
   [MEDIA_NOT_FOUND](_state, params) {
     throw new Error(`Media of type ${params.mediaType} not found`)
