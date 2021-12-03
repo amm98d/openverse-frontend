@@ -26,7 +26,7 @@
               :is-finished="isFinished"
               :is-filter-visible="isFilterVisible"
               :search-term="query.q"
-              @load-more="fetchMedia"
+              @load-more="getMediaItems"
             />
           </template>
         </SearchGrid>
@@ -79,7 +79,7 @@ const BrowsePage = {
       this.results.items.length === 0 &&
       this.query.q.trim() !== ''
     ) {
-      await this.fetchMedia({ mediaType: this.mediaType, q: this.query.q })
+      await this.fetchMedia()
     }
   },
   data: () => ({
@@ -141,13 +141,10 @@ const BrowsePage = {
     ...mapMutations(SEARCH, {
       setFilterVisibility: SET_FILTER_IS_VISIBLE,
     }),
-    async getMediaItems(params, mediaType) {
-      if (params.q.trim() !== '') {
-        await this.fetchMedia({ ...params, mediaType })
+    async getMediaItems(params) {
+      if (this.query.q.trim() !== '') {
+        await this.fetchMedia({ ...params })
       }
-    },
-    onLoadMoreItems(searchParams) {
-      this.getMediaItems(searchParams, this.mediaType)
     },
     onSearchFormSubmit({ q }) {
       this.updateQuery({ q })
@@ -170,7 +167,7 @@ const BrowsePage = {
           query: this.searchQueryParams,
         })
         this.$router.push(newPath)
-        this.getMediaItems(this.query, this.mediaType)
+        this.getMediaItems(this.query)
       },
     },
     /**

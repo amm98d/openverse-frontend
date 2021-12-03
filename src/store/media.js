@@ -22,7 +22,7 @@ import {
   SEND_RESULT_CLICKED_EVENT,
   SEND_SEARCH_QUERY_EVENT,
 } from '~/constants/usage-data-analytics-types'
-import { AUDIO, IMAGE } from '~/constants/media'
+import { AUDIO, IMAGE, VIDEO } from '~/constants/media'
 import { USAGE_DATA } from '~/constants/store-modules'
 import AudioService from '~/data/audio-service'
 import ImageService from '~/data/image-service'
@@ -63,31 +63,34 @@ export const createActions = (services) => ({
   /**
    *
    * @param {import('vuex').ActionContext} context
-   * @param params
+   * @param {Object} payload
+   * @param {number} [payload.page] - API page to load.
+   * @param {boolean} [payload.shouldPersistMedia] - whether the existing media
+   * should be added to or replaced.
    * @return {Promise<void>}
    */
-  async [FETCH_MEDIA]({ commit, dispatch, rootState, rootGetters }, params) {
+  async [FETCH_MEDIA]({ commit, dispatch, rootState, rootGetters }, payload) {
+    const { page, shouldPersistMedia = false } = payload
+
+    const queryParams = prepareSearchQueryParams({
+      ...rootGetters['search/searchQueryParams'],
+      ...payload,
+    })
+
     // does not send event if user is paginating for more results
-    const { page, mediaType, q } = params
-    const sessionId = rootState.user.usageSessionId
     if (!page) {
+      const sessionId = rootState.user.usageSessionId
       await dispatch(
         `${USAGE_DATA}/${SEND_SEARCH_QUERY_EVENT}`,
-        { query: q, sessionId },
+        { query: queryParams.q, sessionId },
         { root: true }
       )
     }
+    const mediaType = rootState.search.query.mediaType
 
     commit(FETCH_START_MEDIA, { mediaType })
-    if (!params.page) {
+    if (!page) {
       commit(RESET_MEDIA, { mediaType })
-    }
-    const queryParams = prepareSearchQueryParams({
-      ...rootGetters['search/searchQueryParams'],
-      ...params,
-    })
-    if (!Object.keys(services).includes(mediaType)) {
-      throw new Error(`Cannot fetch unknown media type "${mediaType}"`)
     }
     await services[mediaType]
       .search(queryParams)
@@ -99,7 +102,7 @@ export const createActions = (services) => ({
           media: data.results,
           mediaCount,
           pageCount: data.page_count,
-          shouldPersistMedia: params.shouldPersistMedia,
+          shouldPersistMedia,
           page: page,
         })
         dispatch(HANDLE_NO_MEDIA, { mediaType, mediaCount })
@@ -217,20 +220,25 @@ export const getters = {
    * @param {import('./types').MediaState} state
    * @param getters
    * @param rootState
-   * @return {import('./types').MediaStoreResult}
+   * @return {import('./types').MediaStoreResult|null}
    */
   results(state, getters, rootState) {
+    if (getters.unsupportedMediaType) {
+      return null
+    }
     return state.results[rootState.search.query.mediaType]
   },
   /**
    * Search fetching state for selected media type.
    * @param {import('./types').MediaState} state
    * @param getters
-   * @param rootState
    * @returns {import('./types').fetchState}
    */
-  fetchState(state, getters, rootState) {
-    return state.fetchState[rootState.search.query.mediaType]
+  fetchState(state, getters) {
+    if (getters.unsupportedMediaType) {
+      return {}
+    }
+    return state.fetchState[getters.mediaType]
   },
   /**
    * Returns true if all pages from the search result have been shown.
@@ -240,9 +248,29 @@ export const getters = {
    * @returns {boolean}
    */
   isFinished(state, getters, rootState) {
+    if (getters.unsupportedMediaType) {
+      return true
+    }
     return (
       state.results[rootState.search.query.mediaType].page >=
       state.results[rootState.search.query.mediaType].pageCount
+    )
+  },
+  mediaType(state, getters, rootState) {
+    return rootState.search.query.mediaType
+  },
+  /**
+   * Returns true for media types that are not supported in the API: video and currently audio.
+   *
+   * @param state
+   * @param getters
+   * @param rootState
+   * @returns {boolean}
+   */
+  unsupportedMediaType(state, getters, rootState) {
+    const mediaType = rootState.search.query.mediaType
+    return (
+      mediaType === VIDEO || (mediaType === AUDIO && !process.env.enableAudio)
     )
   },
 }

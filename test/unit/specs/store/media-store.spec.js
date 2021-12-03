@@ -214,29 +214,20 @@ describe('Search Store', () => {
         dispatch: jest.fn(),
         rootState: {
           user: { usageSessionId: 'foo' },
-          search: { query: { q: 'cat' } },
+          search: { query: { q: 'cat', mediaType: IMAGE } },
         },
-        rootGetters: { search: { searchQueryParams: () => {} } },
+        rootGetters: {
+          search: { searchQueryParams: () => ({ q: 'cat', mediaType: IMAGE }) },
+        },
         state: state,
       }
-    })
-
-    it('FETCH_MEDIA throws an error on unknown media type', async () => {
-      const action = createActions(services)[FETCH_MEDIA]
-      const params = {
-        mediaType: 'unknown',
-        page: 1,
-      }
-      await expect(action(context, params)).rejects.toThrow(
-        'Cannot fetch unknown media type "unknown"'
-      )
     })
 
     it('FETCH_MEDIA on success', async () => {
       const params = {
         q: 'foo',
         page: 1,
-        mediaType: IMAGE,
+        shouldPersistMedia: true,
       }
       const action = createActions(services)[FETCH_MEDIA]
       await action(context, params)
@@ -278,7 +269,6 @@ describe('Search Store', () => {
         q: 'foo',
         page: 1,
         shouldPersistMedia: false,
-        mediaType: IMAGE,
       }
       const action = createActions(services)[FETCH_MEDIA]
       await action(context, params)
