@@ -10,7 +10,6 @@
       /></Component>
       <div class="column search-grid-ctr">
         <SearchGridForm @onSearchFormSubmit="onSearchFormSubmit" />
-        <SearchTypeTabs />
         <FilterDisplay v-show="shouldShowFilterTags" />
         <NuxtChild :key="$route.path" @onLoadMoreItems="onLoadMoreItems" />
         <ScrollButton :show-btn="showScrollButton" />
@@ -27,7 +26,6 @@ import {
   UPDATE_SEARCH_TYPE,
 } from '~/constants/action-types'
 import { SET_FILTER_IS_VISIBLE } from '~/constants/mutation-types'
-import { queryStringToSearchType } from '~/utils/search-query-transform'
 import local from '~/utils/local'
 import { ALL_MEDIA, IMAGE, VIDEO } from '~/constants/media'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -149,17 +147,6 @@ const BrowsePage = {
         this.$router.push(newPath)
         this.getMediaItems(this.query, this.mediaType)
       },
-    },
-    /**
-     * Updates the search type only if the route's path changes.
-     * @param newRoute
-     * @param oldRoute
-     */
-    $route(newRoute, oldRoute) {
-      if (newRoute.path !== oldRoute.path) {
-        const searchType = queryStringToSearchType(newRoute.path)
-        this.updateSearchType({ searchType })
-      }
     },
   },
 }
