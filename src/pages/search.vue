@@ -51,6 +51,7 @@ const BrowsePage = {
       `(min-width: ${MIN_SCREEN_WIDTH_FILTER_VISIBLE_BY_DEFAULT}px)`,
       defaultWindow
     )
+
     return {
       isLargeScreen,
     }

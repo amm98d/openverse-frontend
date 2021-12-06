@@ -3,16 +3,19 @@
     <NuxtLink to="/">
       <VLogoLoader />
     </NuxtLink>
+    <VFilterButton />
   </div>
 </template>
 
 <script>
 import { defineComponent } from '@nuxtjs/composition-api'
 import VLogoLoader from '~/components/VLogoLoader/VLogoLoader'
+import VFilterButton from '~/components/VHeader/VFilterButton'
 
 const VHeader = defineComponent({
   name: 'VHeader',
   components: {
+    VFilterButton,
     VLogoLoader,
   },
 })
