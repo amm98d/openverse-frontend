@@ -1,11 +1,15 @@
 <template>
-  <form class="search-bar group flex flex-row" @submit.prevent="handleSearch">
+  <form
+    class="search-bar group flex flex-row items-center"
+    @submit.prevent="handleSearch"
+  >
     <InputField
       v-model="text"
       v-bind="$attrs"
       class="flex-grow search-field"
+      label-text="Search"
       :connection-sides="['end']"
-      input-id="search-bar"
+      field-id="search-bar"
       type="search"
       name="q"
     >
@@ -17,27 +21,23 @@
 </template>
 
 <script>
-import { computed } from '@nuxtjs/composition-api'
+import { computed, defineComponent } from '@nuxtjs/composition-api'
 
 import InputField from '~/components/InputField/InputField.vue'
-import SearchButton from '~/components/Header/SearchBar/SearchButton.vue'
+import SearchButton from '~/components/VHeader/SearchBar/SearchButton.vue'
 
 /**
  * Displays a text field for a search query and is attached to an action button
  * that fires a search request. The loading state and number of hits are also
  * displayed in the bar itself.
  */
-export default {
+const SearchBar = defineComponent({
   name: 'SearchBar',
   components: {
     InputField,
     SearchButton,
   },
   inheritAttrs: false,
-  model: {
-    prop: 'value',
-    event: 'input',
-  },
   props: {
     /**
      * the search query given as input to the field
@@ -53,7 +53,11 @@ export default {
         return props.value
       },
       set(value) {
-        emit('input', value)
+        // For some reason, the `input` event is fired twice,
+        // with InputEvent as value the second time.
+        if (typeof value === 'string') {
+          emit('input', value)
+        }
       },
     })
 
@@ -67,7 +71,8 @@ export default {
       handleSearch,
     }
   },
-}
+})
+export default SearchBar
 </script>
 
 <style>
