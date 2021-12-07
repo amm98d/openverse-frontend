@@ -1,17 +1,19 @@
 <template>
-  <div class="bg-white w-full z-20 fixed">
-    <VFilterButton @toggle="toggleFilter" />
+  <div class="fixed flex py-2 px-8 align-center z-40 w-full bg-white">
+    <NuxtLink to="/">
+      <VLogoLoader />
+    </NuxtLink>
   </div>
 </template>
 
 <script>
-import VFilterButton from '~/components/VHeader/VFilterButton'
 import { defineComponent } from '@nuxtjs/composition-api'
+import VLogoLoader from '~/components/VLogoLoader/VLogoLoader'
 
 const VHeader = defineComponent({
   name: 'VHeader',
   components: {
-    VFilterButton,
+    VLogoLoader,
   },
 })
 
