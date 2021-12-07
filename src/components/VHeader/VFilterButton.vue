@@ -26,6 +26,9 @@ const VFilterButton = defineComponent({
     /**
      * Whether the page has been scrolled. If true on mobile, the button
      * label is blank.
+     * This is currently not implemented, and is always false.
+     * TODO(@obulat): add use-scroll composable to VHeader
+     * @default false
      */
     isScrolled: {
       type: Boolean,
@@ -34,7 +37,6 @@ const VFilterButton = defineComponent({
   },
   setup(props) {
     const { i18n, store } = useContext()
-    // TODO(@obulat): add use-scroll composable to VHeader
     const { isScrolled = false } = props
 
     const defaultWindow = typeof window !== 'undefined' ? window : undefined
@@ -46,6 +48,17 @@ const VFilterButton = defineComponent({
     const isAnyFilterApplied = computed(
       () => appliedFilterTags.value.length > 0
     )
+
+    /**
+     * On screens wider than tablet: 'Filters'.
+     * On mobile screens:
+     * 1. If no filters are applied - '' (icon only).
+     * 2. If the page is scrolled down - '' (icon only).
+     * 3. If the page wasn't scrolled, and some filters are applied:
+     * the number of applied filters, e.g. '7'.
+     *
+     * @type {ComputedRef<string>}
+     */
     const buttonLabel = computed(() => {
       if (isTablet.value) {
         return i18n.t('header.filter-button.simple')
@@ -57,6 +70,12 @@ const VFilterButton = defineComponent({
             appliedFilterTags.value.length
           )
     })
+
+    /**
+     * Icon is not shown on mobile if no filters were applied on mobile.
+     *
+     * @type {ComputedRef<boolean>}
+     */
     const showIcon = computed(() => {
       if (isTablet.value) {
         return true
@@ -64,6 +83,12 @@ const VFilterButton = defineComponent({
       return !isAnyFilterApplied.value
     })
 
+    /**
+     * The sidebar visibility state is kept in the Vuex store. The button is
+     * set to `pressed` state when the sidebar is visible.
+     *
+     * @type {ComputedRef<boolean>}
+     */
     const sidebarVisible = computed(() => {
       return store.state.search.isFilterVisible
     })
