@@ -22,7 +22,7 @@
 import searchIcon from '~/assets/icons/search.svg'
 
 export default {
-  name: 'SearchButton',
+  name: 'VSearchButton',
   setup(props, { attrs }) {
     const type = attrs['type'] ?? 'button'
 
