@@ -1,7 +1,12 @@
 <template>
-  <VButton variant="action-menu" @click="toggleFilters">
-    <FilterIcon v-show="showIcon" class="w-5 h-5" :class="iconPadding" />
-    <span>{{ buttonLabel }}</span>
+  <VButton
+    variant="action-menu"
+    class="self-center"
+    :pressed="sidebarVisible"
+    @click="toggleFilters"
+  >
+    <FilterIcon v-show="showIcon" class="w-6 h-6" width="24" height="24" />
+    <span class="filter-label">{{ buttonLabel }}</span>
   </VButton>
 </template>
 
@@ -58,8 +63,9 @@ const VFilterButton = defineComponent({
       }
       return !isAnyFilterApplied.value
     })
-    const iconPadding = computed(() => {
-      return buttonLabel.value === '' ? '' : 'me-4'
+
+    const sidebarVisible = computed(() => {
+      return store.state.search.isFilterVisible
     })
     const toggleFilters = () => {
       store.commit(`${SEARCH}/${SET_FILTER_IS_VISIBLE}`, {
@@ -69,8 +75,8 @@ const VFilterButton = defineComponent({
 
     return {
       buttonLabel,
+      sidebarVisible,
       showIcon,
-      iconPadding,
 
       toggleFilters,
     }
@@ -79,3 +85,15 @@ const VFilterButton = defineComponent({
 
 export default VFilterButton
 </script>
+
+<style>
+/* Styling notes:
+1. `align-self` for the button prevents its height from
+growing to the parent's height.
+2. Width and height set for the SVG prevent the flash of unstyled SVG,
+where the svg is displayed incorrectly before the CSS has been loaded.
+*/
+.filter-label:not(:empty) {
+  @apply ps-2;
+}
+</style>
